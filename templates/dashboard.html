@@ -1,77 +1,66 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
-    <title>Dashboard</title>
-    <style>
-        input[type="password"], input[type="text"] {
-            width: 200px;
-        }
-        button {
-            margin-left: 5px;
-        }
-    </style>
+    <meta charset="UTF-8">
+    <title>Tableau de bord</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="icon" type="image/png" href="/static/favicon.png">
 </head>
-<body>
-    <h1>Bienvenue !</h1>
-    <form method="POST">
-        <input type="text" name="site" placeholder="Site" required>
-        <input type="text" name="login" placeholder="Login" required>
-        <input type="text" id="generated-password" name="password" placeholder="Mot de passe" required>
-        <br><br>
-        <label>Longueur : <span id="length-value">12</span></label>
-        <input type="range" min="6" max="32" value="12" id="length-slider" onchange="updateLength()">
-        <button type="button" onclick="generatePassword()">Générer</button>
-        <button type="submit">Enregistrer</button>
-    </form>
+<body class="dark-theme">
+    <div class="container">
+        <header>
+            <h1>Gestionnaire de mots de passe 🔐</h1>
+            <a href="/logout" class="btn logout">Déconnexion</a>
+        </header>
 
-    <h2>Vos mots de passe</h2>
-    <table border="1">
-        <tr><th>Site</th><th>Login</th><th>Mot de passe</th><th>Actions</th></tr>
-        {% for site, login, password in entries %}
-        <tr>
-            <td>{{ site }}</td>
-            <td>{{ login }}</td>
-            <td>
-                <input type="password" value="{{ password }}" readonly>
-            </td>
-            <td>
-                <button onclick="togglePassword(this)">👁️</button>
-                <button onclick="copyPassword(this)">📋</button>
-            </td>
-        </tr>
-        {% endfor %}
-    </table>
+        <section class="add-entry">
+            <h2>Ajouter un mot de passe</h2>
+            <form method="POST">
+                <input type="text" name="site" placeholder="Nom du site" required>
+                <input type="text" name="login" placeholder="Identifiant" required>
+                <input type="password" name="password" placeholder="Mot de passe" required>
+                <button type="submit" class="btn">Ajouter</button>
+            </form>
+        </section>
 
-    <br><a href="/logout">Déconnexion</a>
+        <section class="entries">
+            <h2>Mes mots de passe</h2>
+            {% if entries %}
+                <div class="password-list">
+                    {% for site, login, password in entries %}
+                        <div class="entry">
+                            <div><strong>Site :</strong> {{ site }}</div>
+                            <div><strong>Login :</strong> {{ login }}</div>
+                            <div>
+                                <strong>Mot de passe :</strong>
+                                <input type="password" value="{{ password }}" readonly>
+                                <button onclick="toggleVisibility(this)">👁️</button>
+                                <button onclick="copyToClipboard(this)">📋</button>
+                            </div>
+                            <form method="POST" action="/delete" class="delete-form">
+                                <input type="hidden" name="site" value="{{ site }}">
+                                <input type="hidden" name="login" value="{{ login }}">
+                                <button type="submit" class="btn danger">Supprimer</button>
+                            </form>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p>Aucune entrée enregistrée.</p>
+            {% endif %}
+        </section>
+    </div>
 
     <script>
-        function togglePassword(button) {
-            const input = button.parentElement.previousElementSibling.querySelector("input");
+        function toggleVisibility(btn) {
+            const input = btn.previousElementSibling;
             input.type = input.type === "password" ? "text" : "password";
         }
-
-        function copyPassword(button) {
-            const input = button.parentElement.previousElementSibling.querySelector("input");
-            input.type = "text"; // ensure it's visible
+        function copyToClipboard(btn) {
+            const input = btn.previousElementSibling.previousElementSibling;
             input.select();
-            input.setSelectionRange(0, 99999);
-            document.execCommand("copy");
+            navigator.clipboard.writeText(input.value);
             alert("Mot de passe copié !");
-        }
-
-        function updateLength() {
-            let length = document.getElementById("length-slider").value;
-            document.getElementById("length-value").innerText = length;
-        }
-
-        function generatePassword() {
-            const length = document.getElementById("length-slider").value;
-            const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()";
-            let password = "";
-            for (let i = 0; i < length; i++) {
-                password += charset.charAt(Math.floor(Math.random() * charset.length));
-            }
-            document.getElementById("generated-password").value = password;
         }
     </script>
 </body>
