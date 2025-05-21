@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard</title>
+    <style>
+        input[type="password"], input[type="text"] {
+            width: 200px;
+        }
+        button {
+            margin-left: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Bienvenue !</h1>
+    <form method="POST">
+        <input type="text" name="site" placeholder="Site" required>
+        <input type="text" name="login" placeholder="Login" required>
+        <input type="text" id="generated-password" name="password" placeholder="Mot de passe" required>
+        <br><br>
+        <label>Longueur : <span id="length-value">12</span></label>
+        <input type="range" min="6" max="32" value="12" id="length-slider" onchange="updateLength()">
+        <button type="button" onclick="generatePassword()">Générer</button>
+        <button type="submit">Enregistrer</button>
+    </form>
+
+    <h2>Vos mots de passe</h2>
+    <table border="1">
+        <tr><th>Site</th><th>Login</th><th>Mot de passe</th><th>Actions</th></tr>
+        {% for site, login, password in entries %}
+        <tr>
+            <td>{{ site }}</td>
+            <td>{{ login }}</td>
+            <td>
+                <input type="password" value="{{ password }}" readonly>
+            </td>
+            <td>
+                <button onclick="togglePassword(this)">👁️</button>
+                <button onclick="copyPassword(this)">📋</button>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <br><a href="/logout">Déconnexion</a>
+
+    <script>
+        function togglePassword(button) {
+            const input = button.parentElement.previousElementSibling.querySelector("input");
+            input.type = input.type === "password" ? "text" : "password";
+        }
+
+        function copyPassword(button) {
+            const input = button.parentElement.previousElementSibling.querySelector("input");
+            input.type = "text"; // ensure it's visible
+            input.select();
+            input.setSelectionRange(0, 99999);
+            document.execCommand("copy");
+            alert("Mot de passe copié !");
+        }
+
+        function updateLength() {
+            let length = document.getElementById("length-slider").value;
+            document.getElementById("length-value").innerText = length;
+        }
+
+        function generatePassword() {
+            const length = document.getElementById("length-slider").value;
+            const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()";
+            let password = "";
+            for (let i = 0; i < length; i++) {
+                password += charset.charAt(Math.floor(Math.random() * charset.length));
+            }
+            document.getElementById("generated-password").value = password;
+        }
+    </script>
+</body>
+</html>
