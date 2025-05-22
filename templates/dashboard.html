@@ -1,67 +1,14 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <title>Tableau de bord</title>
-    <link rel="stylesheet" href="/static/style.css">
-    <link rel="icon" type="image/png" href="/static/favicon.png">
-</head>
-<body class="dark-theme">
-    <div class="container">
-        <header>
-            <h1>Gestionnaire de mots de passe 🔐</h1>
-            <a href="/logout" class="btn logout">Déconnexion</a>
-        </header>
-
-        <section class="add-entry">
-            <h2>Ajouter un mot de passe</h2>
-            <form method="POST">
-                <input type="text" name="site" placeholder="Nom du site" required>
-                <input type="text" name="login" placeholder="Identifiant" required>
-                <input type="password" name="password" placeholder="Mot de passe" required>
-                <button type="submit" class="btn">Ajouter</button>
-            </form>
-        </section>
-
-        <section class="entries">
-            <h2>Mes mots de passe</h2>
-            {% if entries %}
-                <div class="password-list">
-                    {% for site, login, password in entries %}
-                        <div class="entry">
-                            <div><strong>Site :</strong> {{ site }}</div>
-                            <div><strong>Login :</strong> {{ login }}</div>
-                            <div>
-                                <strong>Mot de passe :</strong>
-                                <input type="password" value="{{ password }}" readonly>
-                                <button onclick="toggleVisibility(this)">👁️</button>
-                                <button onclick="copyToClipboard(this)">📋</button>
-                            </div>
-                            <form method="POST" action="/delete" class="delete-form">
-                                <input type="hidden" name="site" value="{{ site }}">
-                                <input type="hidden" name="login" value="{{ login }}">
-                                <button type="submit" class="btn danger">Supprimer</button>
-                            </form>
-                        </div>
-                    {% endfor %}
-                </div>
-            {% else %}
-                <p>Aucune entrée enregistrée.</p>
-            {% endif %}
-        </section>
-    </div>
-
-    <script>
-        function toggleVisibility(btn) {
-            const input = btn.previousElementSibling;
-            input.type = input.type === "password" ? "text" : "password";
-        }
-        function copyToClipboard(btn) {
-            const input = btn.previousElementSibling.previousElementSibling;
-            input.select();
-            navigator.clipboard.writeText(input.value);
-            alert("Mot de passe copié !");
-        }
-    </script>
+<!doctype html>
+<html>
+<head><title>Dashboard</title><link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"></head>
+<body>
+<h2>Gestionnaire de mots de passe</h2>
+<table border="1">
+  <tr><th>Site</th><th>Login</th><th>Mot de passe</th></tr>
+  {% for site, login, password in entries %}
+    <tr><td>{{ site }}</td><td>{{ login }}</td><td>{{ password }}</td></tr>
+  {% endfor %}
+</table>
+<a href="/logout">Déconnexion</a>
 </body>
 </html>
